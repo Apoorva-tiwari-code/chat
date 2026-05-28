@@ -34,7 +34,7 @@ public class SarvamAiService {
 
             messages.add(Map.of(
                     "role", "system",
-                    "content", "You are a helpful AI assistant."
+                    "content", "You are a helpful AI assistant. Give only the final answer. Do not include reasoning."
             ));
 
          // Do not send old DB history to Sarvam for now.
@@ -50,8 +50,8 @@ public class SarvamAiService {
             body.put("model", model);
             body.put("messages", messages);
             body.put("temperature", 0.2);
-            body.put("max_tokens", 1000);
-
+            body.put("max_tokens", 2000);
+            
             HttpHeaders headers = new HttpHeaders();
 
             headers.setContentType(MediaType.APPLICATION_JSON);
@@ -101,7 +101,17 @@ public class SarvamAiService {
 
             Object contentObj = message.get("content");
 
-            return String.valueOf(contentObj);
+            if (contentObj == null) {
+                Object reasoningObj = message.get("reasoning_content");
+
+                if (reasoningObj != null) {
+                    return reasoningObj.toString();
+                }
+
+                return "AI response was empty. Please try again.";
+            }
+
+            return contentObj.toString();
 
         } catch (Exception e) {
 
