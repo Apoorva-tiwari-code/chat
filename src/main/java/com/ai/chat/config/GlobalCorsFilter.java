@@ -27,7 +27,9 @@ public class GlobalCorsFilter implements Filter {
 
         String origin = req.getHeader("Origin");
 
-        if ("http://localhost:3000".equals(origin) || "http://localhost:3001".equals(origin)) {
+       if ("http://localhost:3000".equals(origin)
+        || "http://localhost:3001".equals(origin)
+        || "https://chat-five-phi-11.vercel.app".equals(origin)) {
             res.setHeader("Access-Control-Allow-Origin", origin);
         }
 
