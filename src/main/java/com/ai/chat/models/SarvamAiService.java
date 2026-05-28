@@ -36,6 +36,7 @@ public class SarvamAiService {
         ));
 
         for (ChatMessage msg : history) {
+
             messages.add(Map.of(
                     "role", msg.getRole(),
                     "content", msg.getContent()
@@ -48,12 +49,14 @@ public class SarvamAiService {
         ));
 
         Map<String, Object> body = new HashMap<>();
+
         body.put("model", model);
         body.put("messages", messages);
         body.put("temperature", 0.2);
         body.put("max_tokens", 1000);
 
         HttpHeaders headers = new HttpHeaders();
+
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.setBearerAuth(apiKey);
 
@@ -61,7 +64,11 @@ public class SarvamAiService {
                 new HttpEntity<>(body, headers);
 
         ResponseEntity<Map> response =
-                restTemplate.postForEntity(url, entity, Map.class);
+                restTemplate.postForEntity(
+                        url,
+                        entity,
+                        Map.class
+                );
 
         Map responseBody = response.getBody();
 
@@ -84,12 +91,19 @@ public class SarvamAiService {
         }
 
         Map firstChoice = (Map) choices.get(0);
+
         Map message = (Map) firstChoice.get("message");
 
-        if (message == null || message.get("content") == null) {
-            return "Sarvam AI response format is different. Response: " + responseBody;
+        Object contentObj = null;
+
+        if (message != null) {
+            contentObj = message.get("content");
         }
 
-        return message.get("content").toString();
+        if (contentObj == null) {
+            return "Sarvam AI returned null content. Full Response: " + responseBody;
+        }
+
+        return contentObj.toString();
     }
 }
