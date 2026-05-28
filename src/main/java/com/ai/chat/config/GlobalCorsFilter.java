@@ -27,12 +27,13 @@ public class GlobalCorsFilter implements Filter {
 
         String origin = req.getHeader("Origin");
 
-      if ("http://localhost:3000".equals(origin)
-        || "http://localhost:3001".equals(origin)
-        || "https://chat-five-phi-11.vercel.app".equals(origin)
-        || "https://aichat-frontend-amber.vercel.app".equals(origin)) {
-            res.setHeader("Access-Control-Allow-Origin", origin);
-        }
+      String origin = request.getHeader("Origin");
+
+response.setHeader("Access-Control-Allow-Credentials", "true");
+
+if (origin != null) {
+    response.setHeader("Access-Control-Allow-Origin", origin);
+}
 
         res.setHeader("Access-Control-Allow-Credentials", "true");
         res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
