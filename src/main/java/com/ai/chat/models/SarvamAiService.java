@@ -26,84 +26,97 @@ public class SarvamAiService {
 
     public String askSarvam(List<ChatMessage> history, String userMessage) {
 
-        String url = "https://api.sarvam.ai/v1/chat/completions";
+        try {
 
-        List<Map<String, String>> messages = new ArrayList<>();
+            String url = "https://api.sarvam.ai/v1/chat/completions";
 
-        messages.add(Map.of(
-                "role", "system",
-                "content", "You are a helpful AI assistant."
-        ));
-
-        for (ChatMessage msg : history) {
+            List<Map<String, String>> messages = new ArrayList<>();
 
             messages.add(Map.of(
-                    "role", msg.getRole(),
-                    "content", msg.getContent()
+                    "role", "system",
+                    "content", "You are a helpful AI assistant."
             ));
+
+            for (ChatMessage msg : history) {
+
+                messages.add(Map.of(
+                        "role", msg.getRole(),
+                        "content", msg.getContent()
+                ));
+            }
+
+            messages.add(Map.of(
+                    "role", "user",
+                    "content", userMessage
+            ));
+
+            Map<String, Object> body = new HashMap<>();
+
+            body.put("model", model);
+            body.put("messages", messages);
+            body.put("temperature", 0.2);
+            body.put("max_tokens", 1000);
+
+            HttpHeaders headers = new HttpHeaders();
+
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.setBearerAuth(apiKey);
+
+            HttpEntity<Map<String, Object>> entity =
+                    new HttpEntity<>(body, headers);
+
+            ResponseEntity<Map> response =
+                    restTemplate.postForEntity(
+                            url,
+                            entity,
+                            Map.class
+                    );
+
+            Map responseBody = response.getBody();
+
+            System.out.println("SARVAM RESPONSE = " + responseBody);
+
+            if (responseBody == null) {
+                return "No response received from Sarvam AI.";
+            }
+
+            Object choicesObj = responseBody.get("choices");
+
+            if (choicesObj == null) {
+                return "Sarvam AI did not return choices. Response: " + responseBody;
+            }
+
+            List choices = (List) choicesObj;
+
+            if (choices.isEmpty()) {
+                return "Sarvam AI returned empty choices.";
+            }
+
+            Map firstChoice = (Map) choices.get(0);
+
+            if (firstChoice == null) {
+                return "First choice is null. Response: " + responseBody;
+            }
+
+            Map message = (Map) firstChoice.get("message");
+
+            if (message == null) {
+                return "Message object is null. Response: " + responseBody;
+            }
+
+            Object contentObj = message.get("content");
+
+            if (contentObj == null) {
+                return "Content is null. Response: " + responseBody;
+            }
+
+            return contentObj.toString();
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+
+            return "Error while calling Sarvam AI: " + e.getMessage();
         }
-
-        messages.add(Map.of(
-                "role", "user",
-                "content", userMessage
-        ));
-
-        Map<String, Object> body = new HashMap<>();
-
-        body.put("model", model);
-        body.put("messages", messages);
-        body.put("temperature", 0.2);
-        body.put("max_tokens", 1000);
-
-        HttpHeaders headers = new HttpHeaders();
-
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.setBearerAuth(apiKey);
-
-        HttpEntity<Map<String, Object>> entity =
-                new HttpEntity<>(body, headers);
-
-        ResponseEntity<Map> response =
-                restTemplate.postForEntity(
-                        url,
-                        entity,
-                        Map.class
-                );
-
-        Map responseBody = response.getBody();
-
-        System.out.println("SARVAM RESPONSE = " + responseBody);
-
-        if (responseBody == null) {
-            return "No response received from Sarvam AI.";
-        }
-
-        Object choicesObj = responseBody.get("choices");
-
-        if (choicesObj == null) {
-            return "Sarvam AI did not return choices. Response: " + responseBody;
-        }
-
-        List choices = (List) choicesObj;
-
-        if (choices.isEmpty()) {
-            return "Sarvam AI returned empty choices.";
-        }
-
-        Map firstChoice = (Map) choices.get(0);
-
-        Map message = (Map) firstChoice.get("message");
-
-        Object contentObj = null;
-
-        if (message != null) {
-            contentObj = message.get("content");
-        }
-
-        if (contentObj == null) {
-            return "Sarvam AI returned null content. Full Response: " + responseBody;
-        }
-
-        return contentObj.toString();
     }
 }
