@@ -24,22 +24,18 @@ public class SarvamAiService {
 
     private final RestTemplate restTemplate = new RestTemplate();
 
-    public String askSarvam(List<ChatMessage> history,
-                            String userMessage) {
+    public String askSarvam(List<ChatMessage> history, String userMessage) {
 
         String url = "https://api.sarvam.ai/v1/chat/completions";
 
         List<Map<String, String>> messages = new ArrayList<>();
 
-     
         messages.add(Map.of(
                 "role", "system",
                 "content", "You are a helpful AI assistant."
         ));
 
-  
         for (ChatMessage msg : history) {
-
             messages.add(Map.of(
                     "role", msg.getRole(),
                     "content", msg.getContent()
@@ -51,39 +47,48 @@ public class SarvamAiService {
                 "content", userMessage
         ));
 
-       
         Map<String, Object> body = new HashMap<>();
-
         body.put("model", model);
         body.put("messages", messages);
         body.put("temperature", 0.2);
         body.put("max_tokens", 1000);
 
-     
         HttpHeaders headers = new HttpHeaders();
-
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.setBearerAuth(apiKey);
-
 
         HttpEntity<Map<String, Object>> entity =
                 new HttpEntity<>(body, headers);
 
-     
         ResponseEntity<Map> response =
-                restTemplate.postForEntity(
-                        url,
-                        entity,
-                        Map.class
-                );
+                restTemplate.postForEntity(url, entity, Map.class);
 
-        List choices =
-                (List) response.getBody().get("choices");
+        Map responseBody = response.getBody();
+
+        System.out.println("SARVAM RESPONSE = " + responseBody);
+
+        if (responseBody == null) {
+            return "No response received from Sarvam AI.";
+        }
+
+        Object choicesObj = responseBody.get("choices");
+
+        if (choicesObj == null) {
+            return "Sarvam AI did not return choices. Response: " + responseBody;
+        }
+
+        List choices = (List) choicesObj;
+
+        if (choices.isEmpty()) {
+            return "Sarvam AI returned empty choices.";
+        }
 
         Map firstChoice = (Map) choices.get(0);
+        Map message = (Map) firstChoice.get("message");
 
-        Map message =
-                (Map) firstChoice.get("message");
+        if (message == null || message.get("content") == null) {
+            return "Sarvam AI response format is different. Response: " + responseBody;
+        }
 
         return message.get("content").toString();
     }
