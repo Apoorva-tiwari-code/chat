@@ -74,7 +74,7 @@ public class SarvamAiService {
 
             Map responseBody = response.getBody();
 
-            System.out.println("SARVAM RESPONSE = " + responseBody);
+            System.out.println("FULL RESPONSE = " + responseBody);
 
             if (responseBody == null) {
                 return "No response received from Sarvam AI.";
@@ -83,7 +83,7 @@ public class SarvamAiService {
             Object choicesObj = responseBody.get("choices");
 
             if (choicesObj == null) {
-                return "Sarvam AI did not return choices. Response: " + responseBody;
+                return "Sarvam AI did not return choices. Full Response: " + responseBody;
             }
 
             List choices = (List) choicesObj;
@@ -95,22 +95,18 @@ public class SarvamAiService {
             Map firstChoice = (Map) choices.get(0);
 
             if (firstChoice == null) {
-                return "First choice is null. Response: " + responseBody;
+                return "First choice is null.";
             }
 
             Map message = (Map) firstChoice.get("message");
 
             if (message == null) {
-                return "Message object is null. Response: " + responseBody;
+                return "Message object is null.";
             }
 
             Object contentObj = message.get("content");
 
-            if (contentObj == null) {
-                return "Content is null. Response: " + responseBody;
-            }
-
-            return contentObj.toString();
+            return String.valueOf(contentObj);
 
         } catch (Exception e) {
 
