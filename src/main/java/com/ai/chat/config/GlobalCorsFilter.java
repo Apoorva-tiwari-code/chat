@@ -22,18 +22,18 @@ public class GlobalCorsFilter implements Filter {
             FilterChain chain
     ) throws IOException, ServletException {
 
-        HttpServletRequest req = (HttpServletRequest) request;
-        HttpServletResponse res = (HttpServletResponse) response;
+HttpServletRequest req = (HttpServletRequest) request;
+HttpServletResponse res = (HttpServletResponse) response;
 
-        String origin = req.getHeader("Origin");
+String origin = req.getHeader("Origin");
 
-      String origin = request.getHeader("Origin");
-
-response.setHeader("Access-Control-Allow-Credentials", "true");
+res.setHeader("Access-Control-Allow-Credentials", "true");
 
 if (origin != null) {
-    response.setHeader("Access-Control-Allow-Origin", origin);
+    res.setHeader("Access-Control-Allow-Origin", origin);
 }
+
+
 
         res.setHeader("Access-Control-Allow-Credentials", "true");
         res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
