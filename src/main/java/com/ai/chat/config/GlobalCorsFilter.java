@@ -2,6 +2,8 @@ package com.ai.chat.config;
 
 import java.io.IOException;
 
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 import jakarta.servlet.Filter;
@@ -13,6 +15,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 @Component
+@Order(Ordered.HIGHEST_PRECEDENCE)
 public class GlobalCorsFilter implements Filter {
 
     @Override
@@ -22,19 +25,16 @@ public class GlobalCorsFilter implements Filter {
             FilterChain chain
     ) throws IOException, ServletException {
 
-HttpServletRequest req = (HttpServletRequest) request;
-HttpServletResponse res = (HttpServletResponse) response;
+        HttpServletRequest req = (HttpServletRequest) request;
+        HttpServletResponse res = (HttpServletResponse) response;
 
-String origin = req.getHeader("Origin");
+        String origin = req.getHeader("Origin");
 
-res.setHeader("Access-Control-Allow-Credentials", "true");
+        if (origin != null) {
+            res.setHeader("Access-Control-Allow-Origin", origin);
+        }
 
-if (origin != null) {
-    res.setHeader("Access-Control-Allow-Origin", origin);
-}
-
-
-
+        res.setHeader("Vary", "Origin");
         res.setHeader("Access-Control-Allow-Credentials", "true");
         res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
         res.setHeader("Access-Control-Allow-Headers", "Origin, Content-Type, Accept, Authorization, X-Requested-With");
