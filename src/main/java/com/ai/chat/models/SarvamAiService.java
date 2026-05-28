@@ -37,12 +37,20 @@ public class SarvamAiService {
                     "content", "You are a helpful AI assistant."
             ));
 
+            String lastRole = "";
+
             for (ChatMessage msg : history) {
+
+                if (msg.getRole().equals(lastRole)) {
+                    continue;
+                }
 
                 messages.add(Map.of(
                         "role", msg.getRole(),
                         "content", msg.getContent()
                 ));
+
+                lastRole = msg.getRole();
             }
 
             messages.add(Map.of(
